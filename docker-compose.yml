@@ -1,0 +1,59 @@
+version: '3'
+services:
+  nginx:
+    image: nginx-dd:v1
+    depends_on:
+      - php
+      #- memcached
+    ports:
+      - "80:80"
+    volumes:
+      - /www:/www
+      - data:/var/log/nginx
+    networks:
+      lnmp:
+        ipv4_address: '172.18.0.2'
+    restart: always
+    container_name: nginx-dd
+ 
+  php:
+    image: php-dd:v1
+    networks:
+      lnmp:
+        ipv4_address: '172.18.0.3'
+    extra_hosts:
+      - "test.aa.com:172.18.0.2"
+      - "m.bb.com:172.18.0.2"
+    volumes:
+      - /www:/www
+    restart: always
+    container_name: php-dd
+ 
+ # memcached:
+ #   image: memcached:latest
+ #   networks:
+ #     lnmp:
+ #       ipv4_address: '172.18.0.4'
+ #   restart: always
+ #   container_name: memcache-dd 
+  
+ # cronjob:
+ #   image: cronjob:v16
+ #   networks:
+ #     lnmp:
+ #       ipv4_address: '172.18.0.5'
+ #   volumes:
+ #     - /www:/www
+ #   restart: always
+ #   container_name: cronjob-dd
+ #   hostname: 'phone number'
+
+networks:
+  lnmp:
+    ipam:
+      config:
+      - subnet: 172.18.0.0/16
+ 
+volumes:
+  data:
+

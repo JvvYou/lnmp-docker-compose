@@ -1,0 +1,75 @@
+version: '3'
+services:
+  nginx:
+    image: harbor.xxx.com:8090/php7lnmp/nginx-dd:v1
+    depends_on:
+      - php
+    ports:
+      - "80:80"
+    volumes:
+      - /www:/www
+      - data:/var/log/nginx
+    networks:
+      - lnmp
+    container_name: nginx-dd
+    restart: on-failure
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 60s
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1000M
+        reservations:
+          #cpus: '0.5'
+          memory: 500M
+    labels:
+      service: "nginx"
+    dns: 8.8.8.8
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      #start_period: 40s
+
+  php:
+    image: harbor.xxx.com:8090/php7lnmp/php-dd:v1
+    networks:
+      - lnmp
+    volumes:
+      - /www:/www
+    restart: on-failure
+    container_name: php-dd
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 60s
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1000M
+        reservations:
+          #cpus: '0.5'
+          memory: 500M
+    labels:
+      service: "php"
+    dns: 8.8.8.8
+    healthcheck:
+      test: ["CMD", "netstat", "-tnlp","|", "grep 9000"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      #start_period: 40s
+
+networks:
+  lnmp:
+
+volumes:
+  data:
+
